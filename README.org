@@ -148,27 +148,17 @@ Homebrew users will want to uncomment the =:pre-build= directive so that straigh
 
 #+begin_src emacs-lisp :eval no :exports code
 (straight-use-package
-	'(sqlite3
-      :host github
-      :repo "kevinrineer/emacs-sqlite3-api"
-      :branch "generic-makefile"
-	  :files (:defaults "*.dll" "*.dylib" "*.so")
-      ;; :pre-build ("env" "HOMEBREW=1" "make" "all")
-))
-(load-library "sqlite3")
-
-
-(straight-use-package
    '(sqlite3
       :host github
       :repo "pekingduck/emacs-sqlite3-api"
       :files (:defaults "*.dll" "*.dylib" "*.so")
+      ;; :pre-build ("env" "HOMEBREW=1" "make" "all")
     ))
 (load-library "sqlite3")
 #+end_src
 
 **** Straight with the use-package macro
-One can optionally use straight with the use-package macro to get all of the configuration handled in one block:
+One can optionally use straight with the use-package macro to get all of the configuration - including homebrew - handled in one block:
 
 #+begin_src emacs-lisp :eval no :exports code
 (use-package sqlite3
@@ -182,12 +172,11 @@ One can optionally use straight with the use-package macro to get all of the con
     (if-let (current-path (getenv "LD_LIBRARY_PATH"))
         (concat sqlite-lib-dir ":" current-path)
       sqlite-lib-dir))
-  ;; 2. Customize straight.el's build process for the sqlite3 module
+  ;; Customize straight.el's build process for the sqlite3 module
   :straight
   (sqlite3 
    :host github
-   :repo "kevinrineer/emacs-sqlite3-api"
-   :branch "generic-makefile"
+   :repo "pekingduck/emacs-sqlite3-api"
    :files (:defaults "*.dll" "*.dylib" "*.so")
    :pre-build ("env" "HOMEBREW=1" "make" "all"))
   :config
