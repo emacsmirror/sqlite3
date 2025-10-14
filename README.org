@@ -108,7 +108,7 @@ $ make module
 A tar archive called ~sqlite3-X.Y.tar~ will be created. Do a ~M-x package-install-file~ in Emacs to install that tar archive and 
 you're all set.
 
-For Mac users:
+For Homebrew users on MacOS or Linux:
 #+BEGIN_SRC sh :eval no :exports code
 $ make HOMEBREW=1
 #+END_SRC
