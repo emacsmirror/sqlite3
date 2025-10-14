@@ -3,13 +3,14 @@ INC ?= -I.
 LIB ?= -lsqlite3
 
 ifeq ($(HOMEBREW), 1)
- INC=-I/usr/local/opt/sqlite3/include
- LIB=-L/usr/local/opt/sqlite3/lib -lsqlite3
+ PREFIX=$(shell brew --prefix sqlite)
+ INC=-I$(PREFIX)/include
+ LIB=-L$(PREFIX)/lib -lsqlite3
 endif
 
 CFLAGS ?= -g3 -Wall -std=c99 $(INC)
 
-EMACS ?= /Applications/Emacs.app/Contents/MacOS/Emacs-x86_64-10_14
+EMACS ?= $(shell which emacs)
 
 UNAME_O=$(shell uname -o)
 ifeq ($(UNAME_O),Cygwin)
