@@ -100,7 +100,7 @@ The module is built using the `make all` command by default. To customize the bu
 
 *** Elpa
 #+BEGIN_SRC sh :eval no :exports code
-$ git co https://github.com/pekingduck/emacs-sqlite3-api
+$ git clone https://github.com/pekingduck/emacs-sqlite3-api
 $ cd emacs-sqlite3-api
 $ make module
 #+END_SRC
@@ -121,7 +121,7 @@ $ make INC=/path/to/sqlite3/include LIB="-L/path/to/sqlite3/lib -lsqlite3"
 
 *** Manual Installation
 #+BEGIN_SRC sh :eval no :exports code
-$ git co https://github.com/pekingduck/emacs-sqlite3-api
+$ git clone https://github.com/pekingduck/emacs-sqlite3-api
 $ cd emacs-sqlite3-api
 $ make
 $ cp sqlite3.el sqlite3-api.so /your/elisp/load-path/
