@@ -46,6 +46,7 @@
   - [[#installation--removal][Installation & Removal]]
     - [[#melpa][Melpa]]
     - [[#elpa][Elpa]]
+    - [[#straightel][Straight.el]]
     - [[#manual-installation][Manual Installation]]
     - [[#removal][Removal]]
     - [[#note-on-package-update][Note on Package Update]]
@@ -96,11 +97,11 @@ compilation of the dynamic module:
 sqlite3-api module must be built.  Do so now?
 #+END_SRC
 
-The module is built using the `make all` command by default. To customize the build process, you can override this behavior by setting the `SQLITE3_API_BUILD_COMMAND` environment variable.
+The module is built using the ~make all~ command by default. To customize the build process, you can override this behavior by setting the =SQLITE3_API_BUILD_COMMAND= environment variable.
 
 *** Elpa
 #+BEGIN_SRC sh :eval no :exports code
-$ git co https://github.com/pekingduck/emacs-sqlite3-api
+$ git clone https://github.com/pekingduck/emacs-sqlite3-api
 $ cd emacs-sqlite3-api
 $ make module
 #+END_SRC
@@ -108,7 +109,7 @@ $ make module
 A tar archive called ~sqlite3-X.Y.tar~ will be created. Do a ~M-x package-install-file~ in Emacs to install that tar archive and 
 you're all set.
 
-For Mac users:
+For Homebrew users on MacOS or Linux:
 #+BEGIN_SRC sh :eval no :exports code
 $ make HOMEBREW=1
 #+END_SRC
@@ -119,9 +120,75 @@ If you have sqlite3 installed in a nonstandard location:
 $ make INC=/path/to/sqlite3/include LIB="-L/path/to/sqlite3/lib -lsqlite3"
 #+END_SRC
 
+*** Straight.el
+If you would like to use this library with [[https://github.com/radian-software/straight.el][the straight emacs package manager]], you will need git pre-installed.
+The following are example snippets of elisp that can be included in your init file for using straight.
+**** Setting up the build environment
+For those where sqlite3 C library is installed to a non-standard directory, such as with an installation via homebrew, you may need to add the path to the =libsqlite3.so= to your =LD_LIBRARY_PATH= environment variable with ~setenv~.
+
+#+begin_src emacs-lisp :eval no :exports code
+(defconst sqlite-lib-dir
+  ;; This example executes 'brew --prefix sqlite' to find the current installation path dynamically
+  (concat
+   (string-trim (shell-command-to-string "brew --prefix sqlite"))
+   "/lib"))
+
+;; Set LD_LIBRARY_PATH in Emacs' environment
+(setenv "LD_LIBRARY_PATH" 
+        (if-let (current-path (getenv "LD_LIBRARY_PATH"))
+            (concat sqlite-lib-dir ":" current-path)
+          sqlite-lib-dir))
+#+end_src 
+
+**** Installing via Straight without the use-package macro
+We need to modify =straight-default-files-directive= with an explicit list of =:files= or our shared object that we compile with ~make~ will not be linked into the emacs load path. 
+Hence, we add to the =:defaults=, the shared library file extensions with a globbing pattern.
+
+Homebrew users will want to uncomment the =:pre-build= directive so that straight runs ~make~ in a way that finds brew's sqlite installation directory.
+
+#+begin_src emacs-lisp :eval no :exports code
+(straight-use-package
+   '(sqlite3
+      :host github
+      :repo "pekingduck/emacs-sqlite3-api"
+      :files (:defaults "*.dll" "*.dylib" "*.so")
+      ;; :pre-build ("env" "HOMEBREW=1" "make" "all")
+    ))
+(load-library "sqlite3")
+#+end_src
+
+**** Straight with the use-package macro
+One can optionally use straight with the use-package macro to get all of the configuration - including homebrew - handled in one block:
+
+#+begin_src emacs-lisp :eval no :exports code
+(use-package sqlite3
+  :init
+  (defconst sqlite-lib-dir
+  ;; Execute 'brew --prefix sqlite' to find the current installation path
+	(concat
+	 (string-trim (shell-command-to-string "brew --prefix sqlite"))
+	 "/lib"))  
+  (setenv "LD_LIBRARY_PATH" 
+    (if-let (current-path (getenv "LD_LIBRARY_PATH"))
+        (concat sqlite-lib-dir ":" current-path)
+      sqlite-lib-dir))
+  ;; Customize straight.el's build process for the sqlite3 module
+  :straight
+  (sqlite3 
+   :host github
+   :repo "pekingduck/emacs-sqlite3-api"
+   :files (:defaults "*.dll" "*.dylib" "*.so")
+   :pre-build ("env" "HOMEBREW=1" "make" "all"))
+  :config
+  (load-library "sqlite3")
+)
+#+end_src
+
+The =:init= section runs before the package is loaded into emacs, so it is great for handling things the OS dynamic loader might want defined.
+
 *** Manual Installation
 #+BEGIN_SRC sh :eval no :exports code
-$ git co https://github.com/pekingduck/emacs-sqlite3-api
+$ git clone https://github.com/pekingduck/emacs-sqlite3-api
 $ cd emacs-sqlite3-api
 $ make
 $ cp sqlite3.el sqlite3-api.so /your/elisp/load-path/
